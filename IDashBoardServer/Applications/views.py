@@ -318,12 +318,13 @@ def vmHost_reply(request):
             if request.POST['request_type'] == 'new':
                 vm_name = request.POST['vm_name']
                 vm_username = request.POST['vm_username']
+                vm_port = request.POST['port']
                 vm = VirtualMachine.objects.filter(uuid=vm_uuid)
                 if len(vm)!= 0:
                     webServer_response['request_response'] = "repeated uuid error"
                     return HttpResponse(str(webServer_response))
                 newVM = VirtualMachine(uuid=vm_uuid, lastConnectTime=datetime.datetime.now(),
-                                       hostname=vm_name, username=vm_username, state=1)
+                                       hostname=vm_name, username=vm_username, state=1, port=vm_port)
                 newVM.vmHost = application.pvm
                 newVM.vmUser = application.applicant
                 newVM.save()

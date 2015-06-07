@@ -7,6 +7,7 @@ $(document).ready(function(){
         ajax: '/get_my_VMs/',
         columns:[
             {'data': 'uuid'},
+            {'data': 'port'},
             {'data': 'state'},
 			{'data': 'parameter'},
             {'data': 'treatment'}
@@ -24,16 +25,16 @@ $(document).ready(function(){
             memory = data.parameter.memory;
             os = data.parameter.os;
             osset = ['ubuntu 14.04 LTS'];
-            memoryset = ['1024M', '2048M'];
+            memoryset = ['512M', '1024M'];
             var states = ["online", "offline", "savestate"];
             var parameterhtml = '<div><strong>os:</strong>' + osset[os - 1] + '<br/><strong>hostname:</strong>'
                 + hostname + '<br><strong>username:</strong>' + username + '<br><strong>memory:</strong>' +  memoryset[memory - 1] + '</div>';
 
             var treatmenthtml = '<div><button class = "btn btn-success startVM">start</button><button class = "btn btn-success shutdownVM">shutdown</button><button class = "btn btn-success savestateVM">savestate</button><button class="btn btn-danger deleteVM" data-toggle="modal" data-target="#deleteModal">delete</button></div>';
             var statehtml = '<a href=/detail/' + data.id + '/ >'+states[data.state]+'</a>';
-            $('td:eq(3)', row).html(treatmenthtml);
-            $('td:eq(2)', row).html(parameterhtml);
-            $('td:eq(1)', row).html(statehtml);
+            $('td:eq(4)', row).html(treatmenthtml);
+            $('td:eq(3)', row).html(parameterhtml);
+            $('td:eq(2)', row).html(statehtml);
         },
         drawCallback: function () {
             var myVMCount = this.api().data().length;
