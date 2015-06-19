@@ -61,7 +61,7 @@ def get_detail(request, vm_id):
             vm = VirtualMachine.objects.filter(id=vm_id)
             if len(vm) != 0:
                 vmDetail = {'data': vm_id, 'Access-Control-Allow-Origin': '*'}
-                vmDetail['uName'] = vm[0].osInfo
+                vmDetail['uName'] = vm[0].osInfo[0:-6]
                 vmDetail['cpuInfo'] = vm[0].cpuInfo
                 vmDetail['memory'] = vm[0].mem
                 vmDetail['swap'] = vm[0].swap
@@ -153,8 +153,8 @@ def getAllActiveVMsSimpleHost():
                 'os': vm.osInfo,
                 'UserName': vm.username,
                 'HostName': vm.hostname,
-                'Memory': str(int(float(vm.mem.split()[1]) / float(vm.mem.split()[0]) * 100 + 0.5)) + '%',
-                'CPU': str(int(100 - float(vm.percentCPU.split()[3]) + 0.5)) + '%',
+                'Memory': str(int(float(vm.mem.split()[1].rstrip('k')) / float(vm.mem.split()[0].rstrip('k')) * 100 + 0.5)) + '%',
+                'CPU': str(int(100 - float(vm.percentCPU.split()[3].rstrip('k')) + 0.5)) + '%',
                 'id': vm.id
             }
         except Exception, e:
@@ -188,8 +188,8 @@ def getAllActiveVMsSimple():
                 'os': vm.osInfo,
                 'UserName': vm.username,
                 'HostName': vm.hostname,
-                'Memory': str(int(float(vm.mem.split()[1]) / float(vm.mem.split()[0]) * 100 + 0.5)) + '%',
-                'CPU': str(int(100 - float(vm.percentCPU.split()[3]) + 0.5)) + '%',
+                'Memory': str(int(float(vm.mem.split()[1].rstrip('k')) / float(vm.mem.split()[0].rstrip('k')) * 100 + 0.5)) + '%',
+                'CPU': str(int(100 - float(vm.percentCPU.split()[3].rstrip('k')) + 0.5)) + '%',
                 'id': vm.id
             }
         except Exception, e:

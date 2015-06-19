@@ -75,6 +75,7 @@
 				<ui class="nav navbar-nav" style="margin-left: 100px;">
 					<li {% block main_active %}{% endblock %}><a href="/home/">Mainboard<span class="sr-only">(current)</span></a></li>
 					<li {% block apply_active %}{% endblock %}><a href="/apply/">Apply</a></li>
+					<li {% block apply_myVMs %}{% endblock %}><a href="/myVMs/">My VMs</a></li>
                     {% if isTeacher %}
                         <li {% block audit_active %}{% endblock %}><a href="/audit/">Audit</a></li>
                     {% endif %}

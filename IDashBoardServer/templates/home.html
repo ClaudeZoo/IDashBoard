@@ -15,17 +15,20 @@
 {% block container %}
 	<div class="container">
         <!-- Datatable元素 -->
-        <div role="tabpanel">
+        <div>
 
             <!-- Nav tabs -->
-            <ul class="nav nav-tabs tablist" role="tablist">
-                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Hosts</a></li>
+            <!--ul class="nav nav-tabs tablist" role="tablist">
+                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Servers</a></li>
                 <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Virtual Machines</a></li>
-            </ul>
+            </ul-->
 
             <!-- Tab panes -->
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="home">
+            <div class="panel panel-info">
+            	<div class="panel-heading">
+    				<h3 class="panel-title">Servers</h3>
+				</div>
+                <div class="panel-body">
                     <table id="host-data-table" class="display" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -39,7 +42,12 @@
                         </thead>
                     </table>
                 </div>
-                <div role="tabpanel" class="tab-pane" id="profile">
+			</div>
+			<div class="panel panel-success">
+				<div class="panel-heading">
+    				<h3 class="panel-title">Virtual Machines</h3>
+				</div>
+                <div class="panel-body">
                     <!-- Datatable元素 -->
                     <table id="main-data-table" class="display" cellspacing="0" width="100%">
                         <thead>

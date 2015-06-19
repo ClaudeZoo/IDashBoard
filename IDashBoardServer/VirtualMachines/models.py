@@ -68,3 +68,5 @@ class VirtualMachine(models.Model):
             self.osInfo = info["os"]
         if "process" in info:
             self.process = info["process"]
+        if "port" in info:
+            self.port = info["port"]

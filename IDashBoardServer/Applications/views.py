@@ -16,8 +16,8 @@ def do_apply(request):
                 errors.append('select vm_type')
             if not request.POST.get('os', ''):
                 errors.append('select os')
-            if not request.POST.get('password', ''):
-                errors.append('Enter a password.')
+            #if not request.POST.get('password', ''):
+                #errors.append('Enter a password.')
             if not request.POST.get('memory', ''):
                 errors.append('select memory')
             if not errors:
