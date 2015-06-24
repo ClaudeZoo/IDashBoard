@@ -10,3 +10,7 @@ label.error {
 	font-weight: inherit;
 	color: red;
 }
+
+.hide {
+	display: none;
+}

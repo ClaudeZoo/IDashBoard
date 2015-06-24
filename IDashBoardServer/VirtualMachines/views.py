@@ -98,17 +98,18 @@ def get_my_VMs(request):
                 dic = {
                     "id": virtual_machine.id,
                     "uuid": virtual_machine.uuid,
-                    "port": virutal_machine.port,
+                    "port": virtual_machine.port,
                     "state": virtual_machine.state,
                     "parameter":
                     {
-                        "os": application.OS[0:-6],
+                        "os": application.OS,
                         "memory": application.Memory,
                         "hostname": virtual_machine.hostname,
-                        "username": virtual_machine.username,
+                        "username": virtual_machine.username
                     },
                     "treatment": "edit/delete"
                 }
+                
             except Exception, e:
                 print e
                 dic = {

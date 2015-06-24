@@ -68,48 +68,7 @@
 				</button>
 				<a class="navbar-brand" href="/home/"><strong>iDashBoard</strong></a>
 			</div>
-			<!-- 导航条主体 -->
-			<!-- 响应式 -->
-			<div class="collapse navbar-collapse" id="navbar-collapse-body">
-				<!-- 左侧按钮 -->
-				<ui class="nav navbar-nav" style="margin-left: 100px;">
-					<li {% block main_active %}{% endblock %}><a href="/home/">Mainboard<span class="sr-only">(current)</span></a></li>
-					<li {% block apply_active %}{% endblock %}><a href="/apply/">Apply</a></li>
-					<li {% block apply_myVMs %}{% endblock %}><a href="/myVMs/">My VMs</a></li>
-                    {% if isTeacher %}
-                        <li {% block audit_active %}{% endblock %}><a href="/audit/">Audit</a></li>
-                    {% endif %}
-				</ui>
-				<!-- 右侧按钮 -->
-				<ul class="nav navbar-nav navbar-right">
-					<li class="dropdown">
-						<a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-							<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-							{{ request.user.username }}
-							<span class="caret"></span>
-						</a>
-						<ul class="dropdown-menu" role="menu">
-                            <li><a href="/myVMs/">
-								<span class="glyphicon glyphicon-hdd" aria-hidden="true"></span>
-								&nbsp;My VMS
-							</a></li>
-							<li><a href="/settings/">
-								<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-								&nbsp;Settings
-							</a></li>
-                            <li><a href="/applications/">
-								<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-								&nbsp;Historical Applications
-							</a></li>
-							<li class="divider"></li>
-							<li><a href="/logout/">
-								<span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
-								&nbsp;Log out
-							</a></li>
-						</ul>
-					</li>
-				</ul>
-			</div>
+
 		</div>
 	</nav>
     {% endblock %}

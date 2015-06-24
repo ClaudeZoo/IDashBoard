@@ -1,29 +1,25 @@
 $(document).ready(function () {
 	$('#user-name-label').hide();
-	
+	$('#navbar-collapse-body').hide();
+
 	$('#user-info-form').validate({
 		rules: {
 			username: "required",
 			email: {
 				required: true,
 				email: true
-			}
-		}
-	});
-
-	$('#password-form').validate({
-		rules: {
-			password: "required",
-			newpassword: {
+			},
+			password: {
 				required: true,
 				minlength: 6
 			},
 			confirmpassword: {
 				required: true,
-				equalTo: "#new-password"
+				equalTo: "#password"
 			}
 		}
 	});
+
 
 	$('#user-name').bind('blur', function(){
 		name = $("#user-name").val();
