@@ -27,10 +27,23 @@ $(document).ready(function(){
             osset = ['ubuntu 14.04 LTS'];
             memoryset = ['512M', '1024M'];
             var states = ["online", "offline", "savestate"];
-            var parameterhtml = '<div><strong>os:</strong>' + osset[os - 1] + '<br/><strong>hostname:</strong>'
-                + hostname + '<br><strong>username:</strong>' + username + '<br><strong>memory:</strong>' +  memoryset[memory - 1] + '</div>';
-
-            var treatmenthtml = '<div><button class = "btn btn-success startVM">start</button><button class = "btn btn-success shutdownVM">shutdown</button><button class = "btn btn-success savestateVM">savestate</button><button class="btn btn-danger deleteVM" data-toggle="modal" data-target="#deleteModal">delete</button></div>';
+            var parameterhtml = '<div><strong>OS:</strong>' + osset[os - 1] + '<br/><strong>Hostname:</strong>'
+                + hostname + '<br><strong>Username:</strong>' + username + '<br><strong>Memory:</strong>' +  memoryset[memory - 1] + '</div>';
+            var start_button = '<button class="btn btn-success startVM">Start VM</button>';
+            var savestate_button = '<button class="btn btn-success savestateVM">Savestate</button>';
+            var shutdown_button = '<button class="btn btn-success shutdownVM">Shutdown</button>';
+            var delete_button = '<button class="btn btn-danger deleteVM" data-toggle="modal" data-target="#deleteModal">Delete VM</button>';
+            if (data.state == 0)
+            {
+                start_button = '<button class="btn btn-success startVM disabled">Start VM</button>';
+                delete_button = '<button class="btn btn-danger deleteVM disabled" data-toggle="modal" data-target="#deleteModal">Delete VM</button>';
+            }
+            else
+            {
+                savestate_button = '<button class="btn btn-success savestateVM">Savestate</button>';
+                shutdown_button = '<button class="btn btn-warning shutdownVM">Shutdown</button>';
+            }
+            var treatmenthtml = '<div>'+ start_button + savestate_button + shutdown_button + delete_button + '</div>';
             var statehtml = '<a href=/detail/' + data.id + '/ >'+states[data.state]+'</a>';
             $('td:eq(4)', row).html(treatmenthtml);
             $('td:eq(3)', row).html(parameterhtml);
@@ -43,7 +56,11 @@ $(document).ready(function(){
                 // 单击单元格跳转到详细信息
                 $('#myVMs-data-table tr').on('click', 'button.startVM', function () {
                     var id = $(this).parentsUntil('tbody').last().attr('data-id');
-                    $(this).parentsUntil('tr').last().html("please wait...");
+                    $(this).addClass('disabled');
+                    $(this).siblings('button.savestateVM').removeClass('disabled');
+                    $(this).siblings('button.shutdownVM').removeClass('disabled');
+                    $(this).siblings('button.deleteVM').addClass('disabled');
+                    $(this).parent().parent().parent().children().eq(2).html("loading");
                     json_obj = {'id': id}
                         $.post('/start_apply/', JSON.stringify(json_obj), function(data){
                         }
@@ -51,7 +68,11 @@ $(document).ready(function(){
                 });
                 $('#myVMs-data-table tr').on('click', 'button.shutdownVM', function () {
                     var id = $(this).parentsUntil('tbody').last().attr('data-id');
-                    $(this).parentsUntil('tr').last().html("please wait...");
+                    $(this).addClass('disabled');
+                    $(this).siblings('button.deleteVM').removeClass('disabled');
+                    $(this).siblings('button.startVM').removeClass('disabled');
+                    $(this).siblings('button.savestateVM').addClass('disabled');
+                    $(this).parent().parent().parent().children().eq(2).html("loading");
                     json_obj = {'id': id}
                         $.post('/stop_apply/', JSON.stringify(json_obj), function(data){
                         }
@@ -59,13 +80,21 @@ $(document).ready(function(){
                 });
                 $('#myVMs-data-table tr').on('click', 'button.savestateVM', function () {
                     var id = $(this).parentsUntil('tbody').last().attr('data-id');
-                    $(this).parentsUntil('tr').last().html("please wait...");
+                    $(this).addClass('disabled');
+                    $(this).siblings('button.deleteVM').removeClass('disabled');
+                    $(this).siblings('button.startVM').removeClass('disabled');
+                    $(this).siblings('button.shutdownVM').addClass('disabled');
+                    $(this).parent().parent().parent().children().eq(2).html("loading");
                     json_obj = {'id': id}
                         $.post('/savestate_apply/', JSON.stringify(json_obj), function(data){
                         }
                     );
                 });
                 $('#myVMs-data-table tr').on('click', 'button.deleteVM', function () {
+                    $(this).addClass('disabled');
+                    $(this).siblings('button.savestateVM').addClass('disabled');
+                    $(this).siblings('button.startVM').addClass('disabled');
+                    $(this).siblings('button.shutdownVM').addClass('disabled');
                     $("#deleteModal").attr("data-id", $(this).parentsUntil('tbody').last().attr('data-id'))
                 });
             }
@@ -76,7 +105,8 @@ $(document).ready(function(){
 
 function confirmDelete(data_id){
     json_obj = {'id': $('#deleteModal').attr('data-id')}
-    $('#myVMs-data-table').find('tr[data-id='+$('#deleteModal').attr('data-id')+"]").find('td').last().html("please wait...");
+
+    //$('#myVMs-data-table').find('tr[data-id='+$('#deleteModal').attr('data-id')+"]").find('td').last().html("please wait...");
     $.post('/delete_apply/', JSON.stringify(json_obj), function(data){
         }
     );

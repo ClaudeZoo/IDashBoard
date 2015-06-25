@@ -14,3 +14,8 @@ label.error {
 .hide {
 	display: none;
 }
+
+.btn {
+	margin: 3px;
+	width: 85px;
+}
