@@ -1,6 +1,5 @@
 from django.shortcuts import render, render_to_response
-from django.contrib.auth.models import User
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User, Group, Permission
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from DashBoardUser.models import DashBoardUser
@@ -90,6 +89,7 @@ def signUp(request):
                 email=request.POST.get('email', '')
                 )
             new_user.groups = Group.objects.filter(name='students')
+            print(new_user.get_group_permissions())
         return HttpResponseRedirect("/home/")
     else:
         form = UserCreationForm()

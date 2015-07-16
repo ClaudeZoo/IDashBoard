@@ -40,8 +40,8 @@ $(document).ready(function(){
             }
             else
             {
-                savestate_button = '<button class="btn btn-success savestateVM">Savestate</button>';
-                shutdown_button = '<button class="btn btn-warning shutdownVM">Shutdown</button>';
+                savestate_button = '<button class="btn btn-success savestateVM disabled">Savestate</button>';
+                shutdown_button = '<button class="btn btn-warning shutdownVM disabled">Shutdown</button>';
             }
             var treatmenthtml = '<div>'+ start_button + savestate_button + shutdown_button + delete_button + '</div>';
             var statehtml = '<a href=/detail/' + data.id + '/ >'+states[data.state]+'</a>';
