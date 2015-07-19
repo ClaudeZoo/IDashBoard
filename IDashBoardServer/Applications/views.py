@@ -1,14 +1,16 @@
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
+from django.utils import timezone
 from Applications.models import Application
 from VirtualMachines.models import VirtualMachine
+import socket
 import datetime, json
 import random
 from notifyThead import NotifyThread
 # Create your views here.
 
 
-def do_apply(request):
+def apply_new_vm(request):
     errors = []
     if request.user.is_authenticated():
         if request.method == 'POST':
@@ -23,11 +25,12 @@ def do_apply(request):
             if not errors:
                 password = request.POST.get('password', '')
                 try:
-                    os = int(request.POST.get('os', ''))
+                    os = request.POST.get('os', '')
                     memory = int(request.POST.get('memory', ''))
-                    vm_type = int(request.POST.get('vm_type', ''))
-                    new_application = Application(type=0, vm_type=vm_type, OS=os, pwd=password, Memory=memory,\
-                                                  state=0, applicant=request.user, submissionTime=datetime.datetime.now())
+                    vm_type = request.POST.get('vm_type', '')
+                    new_application = Application(type='new', vm_type=vm_type, OS=os, pwd=password, Memory=memory,
+                                                  state='pending', HostName='ubuntu', applicant=request.user,
+                                                  submissionTime=timezone.now())
                     new_application.save()
                 except Exception, e:
                     print(e)
@@ -47,8 +50,8 @@ def delete_apply(request):
             if not errors:
                 try:
                     virtualmachine = VirtualMachine.objects.get(id=int(eval(request.body)['id']))
-                    new_application = Application(type=1, state=0, vm=virtualmachine, pvm=virtualmachine.vmHost,
-                                                  applicant=request.user, submissionTime=datetime.datetime.now())
+                    new_application = Application(type='delete', state='pending', vm=virtualmachine, host=virtualmachine.vmHost,
+                                                  applicant=request.user, submissionTime=timezone.now())
                     new_application.save()
                 except Exception, e:
                     print(e)
@@ -59,92 +62,76 @@ def delete_apply(request):
         return render_to_response('index.html', locals())
 
 
-def start_apply(request):
+def control_vm(request):
+
     errors = []
     if request.user.is_authenticated():
         if request.method == 'POST':
+            control_type = request.POST['request_type']
             if not request.body:
                 errors.append('no id')
             if not errors:
                 try:
-                    virtualmachine = VirtualMachine.objects.get(id=int(eval(request.body)['id']))
-                    new_application = Application(type=2, state=1, vm=virtualmachine, pvm=virtualmachine.vmHost,
-                                                  applicant=request.user, submissionTime=datetime.datetime.now())
-
+                    virtual_machine = VirtualMachine.objects.get(id=int(eval(request.POST['id'])))
+                    new_application = Application(type=control_type, state='in_queue', vm=virtual_machine,
+                                                  host=virtual_machine.vmHost, applicant=request.user,
+                                                  submissionTime=timezone.now())
                     new_application.reviewer = request.user
                     new_application.save()
-                    notify = NotifyThread()
-                    notify.application = new_application
-                    notify.start()
+                    response_dict = communicate_vm_manager(new_application)
+                    print(response_dict)
+                    if response_dict['request_result'] == 'success':
+                        new_application.state = 'done'
+                        if control_type == 'start':
+                            virtual_machine.state = 'online'
+                        elif control_type == 'savestate':
+                            virtual_machine.state = 'savestate'
+                        elif control_type == 'shutdown':
+                            virtual_machine.state = 'poweroff'
+                        virtual_machine.save()
+                    else:
+                        new_application.state == response_dict['request_result']
+                        new_application.error_information = response_dict['error_information']
+                    new_application.save()
                 except Exception, e:
                     print(e)
             else:
                 return HttpResponseRedirect('/apply/')
-            return HttpResponseRedirect('/applications/')
+            print(json.dumps(response_dict))
+            return HttpResponse(json.dumps(response_dict))
     else:
         return render_to_response('index.html', locals())
 
 
-def stop_apply(request):
-    errors = []
-    if request.user.is_authenticated():
-        if request.method == 'POST':
-            if not request.body:
-                errors.append('no id')
-            if not errors:
-                try:
-                    virtualmachine = VirtualMachine.objects.get(id=int(eval(request.body)['id']))
-                    new_application = Application(type=3, state=1, vm=virtualmachine, pvm=virtualmachine.vmHost,
-                                                  applicant=request.user, submissionTime=datetime.datetime.now())
+def communicate_vm_manager(application):
+    host = application.host
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((host.IPAddress, host.port))
+        request = {"request_id": application.id, "request_type": application.type,
+                    "request_userid": application.applicant.id}
+        request['vm_name'] = application.vm.hostname
+        request['vm_uuid'] = application.vm.uuid
+        sock.send(str(request))
+        response = sock.recv(1024)
+        response_dict = eval(response)
+    except Exception, e:
+        print e
+    finally:
+        application.save()
+        sock.close()
+        return response_dict
 
-                    new_application.reviewer = request.user
-                    new_application.save()
-                    notify = NotifyThread()
-                    notify.application = new_application
-                    notify.start()
-                except Exception, e:
-                    print(e)
-            else:
-                return HttpResponseRedirect('/apply/')
-            return HttpResponseRedirect('/applications/')
-    else:
-        return render_to_response('index.html', locals())
-
-def savestate_apply(request):
-    errors = []
-    if request.user.is_authenticated():
-        if request.method == 'POST':
-            if not request.body:
-                errors.append('no id')
-            if not errors:
-                try:
-                    virtualmachine = VirtualMachine.objects.get(id=int(eval(request.body)['id']))
-                    new_application = Application(type=4, state=1, vm=virtualmachine, pvm=virtualmachine.vmHost,
-                                                  applicant=request.user, submissionTime=datetime.datetime.now())
-
-                    new_application.reviewer = request.user
-                    new_application.save()
-                    notify = NotifyThread()
-                    notify.application = new_application
-                    notify.start()
-                except Exception, e:
-                    print(e)
-            else:
-                return HttpResponseRedirect('/apply/')
-            return HttpResponseRedirect('/applications/')
-    else:
-        return render_to_response('index.html', locals())
 
 def get_my_applications(request):
     if request.user.is_authenticated():
         applications = request.user.applicant.all()
         my_applications = []
-        types = ["new", "delete", "start", "shutdown", "savestate"]
         for application in applications:
             try:
                 dic = {
                     "id": application.id,
-                    "type": types[application.type],
+                    "type": application.type,
                     "applicant": application.applicant.username,
                     "parameter":
                     {
@@ -154,7 +141,7 @@ def get_my_applications(request):
                         "hostname": application.HostName,
                         "username": application.UserName
                     },
-                    "submissionTime": application.submissionTime.strftime("%Y-%m-%d-%H"),
+                    "submissionTime": application.submissionTime.strftime("%Y.%m.%d %H:%M:%S"),
                     "state": application.state
                 }
                 if application.vm:
@@ -174,26 +161,24 @@ def get_my_applications(request):
 
 
 def get_untreated_applications(request):
+    print(request)
     if request.user.is_authenticated():
-        applications = Application.objects.filter(state=0)
+        applications = Application.objects.filter(state='pending')
         untreated_applications = []
-        typeset = ["new", "delete", "start", "shutdown", "savestate"]
-        osset = ["Ubuntu 14.04 LTS",""]
-        memoryset = ["1024M", "2048M"]
         for application in applications:
             try:
                 dic = {
                     "id": application.id,
-                    "type": typeset[application.type],
+                    "type": application.type,
                     "applicant": application.applicant.username,
                     "parameter":
                     {
-                        "os": osset[application.OS - 1],
-                        "memory": memoryset[application.Memory - 1],
+                        "os": application.OS,
+                        "memory": str(application.Memory) + "M",
                         "hostname": application.HostName,
                         "username": application.UserName
                     },
-                    "submissionTime": application.submissionTime.strftime("%Y-%m-%d-%H"),
+                    "submissionTime": application.submissionTime.strftime("%Y.%m.%d %H:%M:%S"),
                     "treatment": "accept/refuse"
                 }
                 if application.vm:
@@ -202,14 +187,14 @@ def get_untreated_applications(request):
                 print e
                 dic = {
                     "id": application.id,
-                    "type": typeset[application.type],
+                    "type": application.type,
                     "applicant": application.applicant.username,
                     "parameter":
                     {
                         "hostname": application.HostName,
                         "username": application.UserName
                     },
-                    "submissionTime": application.submissionTime.strftime("%Y-%m-%d-%H"),
+                    "submissionTime": application.submissionTime.strftime("%Y.%m.%d %H:%M:%S"),
                     "treatment": "accept/refuse"
                 }
                 if application.vm:
@@ -229,21 +214,20 @@ def ratify_application(request):
     try:
         id = int(request.POST.get("id"))
         application = Application.objects.get(id=id)
-        if application.state == 0:
+        if application.state == 'pending':
             host = None
-            vms = application.applicant.vm_user.filter(state__lt=4)
+            vms = application.applicant.vm_user.exclude(state='deleted')
             if len(vms) == 0:
                 hosts = VirtualMachine.objects.filter(uuid=None)
                 host = random.sample(hosts, 1)[0]
-                application.pvm=host
             else:
                 host = vms[0].vmHost
-            application.pvm = host
-            application.state = 1
+            application.host = host
+            #print(host)
+            application.state = 'in_queue'
             application.reviewer = request.user
             application.save()
-            notify = NotifyThread()
-            notify.application = application
+            notify = NotifyThread(application) 
             notify.start()
         else:
             return HttpResponse("already treated")
@@ -256,13 +240,12 @@ def ratify_application(request):
 def ratify_all(request):
     if request.method == 'POST':
         try:
-            applications = Application.objects.filter(state=0)
+            applications = Application.objects.filter(state='pending')
             for application in applications:
-                application.state = 1
+                application.state = 'in_queue'
                 application.reviewer = request.user
                 application.save()
-                notify = NotifyThread()
-                notify.application = application
+                notify = NotifyThread(application)
                 notify.start()
         except Exception, e:
             print e
@@ -272,9 +255,9 @@ def ratify_all(request):
 def refuse_all(request):
     if request.method == 'POST':
         try:
-            applications = Application.objects.filter(state=0)
+            applications = Application.objects.filter(state='pending')
             for application in applications:
-                application.state = 2
+                application.state = 'refused'
                 application.reviewer = request.user
                 application.save()
         except Exception, e:
@@ -288,8 +271,8 @@ def refuse_application(request):
     try:
         id = int(request.POST.get("id"))
         application = Application.objects.get(id=id)
-        if application.state == 0:
-            application.state = 2
+        if application.state == 'refused':
+            application.state = 'refused'
             application.save()
         else:
             return HttpResponse("already treated")
@@ -299,77 +282,47 @@ def refuse_application(request):
     return HttpResponse("refused")
 
 
-def vmHost_reply(request):
-    webServer_response = {}
-    if 'request_id' in request.POST and request.POST['request_id']:
-        application_id = request.POST['request_id']
-        webServer_response['request_id'] = application_id
-    else:
-        webServer_response['request_response'] = "no request_id error"
-        return HttpResponse(str(webServer_response))
-    try:
-        application = Application.objects.get(id=application_id)
-        if 'error_information' in request.POST:
-            application.state = 5
+def reply_vmHost(request):
+    response = {}
+    response['request_id'] = request.POST['request_id']
+    response['request_userid'] = request.POST['request_userid']
+    response['request_type'] = request.POST['request_type']
+    request_type = request.POST['request_type']
+    application = Application.objects.get(id=request.POST['request_id'])
+    if request.POST['request_result'] == 'success':
+        vm_uuid = request.POST['vm_uuid']
+        vm_name = request.POST['vm_name']
+        if request_type == 'new':
+            vm_username = request.POST['vm_username']
+            vm_port = request.POST['port']
+            same_name_vms = VirtualMachine.objects.filter(vmName=vm_name)
+            same_uuid_vms = VirtualMachine.objects.filter(uuid=vm_uuid)
+            if len(same_name_vms) != 0 or len(same_uuid_vms) != 0:
+                response['request_response'] = 'Exist a same uuid or vmName'
+                return HttpResponse(str(response))
+            new_vm = VirtualMachine(uuid=vm_uuid, lastConnectTime=datetime.datetime.now(),
+                                    vmName=vm_name, hostname='ubuntu', username=vm_username, state='poweroff', port=vm_port)
+            new_vm.vmHost = application.host
+            new_vm.vmUser = application.applicant
+            new_vm.save()
+            application.vm = new_vm
+            application.state = 'done'
             application.save()
+            response['request_response'] = 'received'
+        elif request_type == 'delete':
+            vm = VirtualMachine.objects.get(uuid=vm_uuid)
+            vm.state = 'deleted'
+            application.state = 'done'
+            application.save()
+            vm.save()
+            response['request_response'] = 'received'
         else:
-            webServer_response['request_type'] = request.POST['request_type']
-            vm_uuid = request.POST['vm_uuid']
-            if request.POST['request_type'] == 'new':
-                vm_name = request.POST['vm_name']
-                vm_username = request.POST['vm_username']
-                vm_port = request.POST['port']
-                vm = VirtualMachine.objects.filter(uuid=vm_uuid)
-                if len(vm)!= 0:
-                    webServer_response['request_response'] = "repeated uuid error"
-                    return HttpResponse(str(webServer_response))
-                newVM = VirtualMachine(uuid=vm_uuid, lastConnectTime=datetime.datetime.now(),
-                                       hostname=vm_name, username=vm_username, state=1, port=vm_port)
-                newVM.vmHost = application.pvm
-                newVM.vmUser = application.applicant
-                newVM.save()
-                application.vm = newVM
-                application.state = 4
-
-            elif request.POST['request_type'] == 'start':
-                vm_ip = request.POST['vm_ip']
-                vm = VirtualMachine.objects.get(uuid=vm_uuid)
-                vm.IPAddress = vm_ip
-
-                if vm.state < 3:
-                    vm.state = 0
-                    application.state = 4
-                    vm.save()
-            elif request.POST['request_type'] == 'shutdown':
-                vm = VirtualMachine.objects.get(uuid=vm_uuid)
-                if vm.state < 3:
-                    vm.state = 1
-                    application.state = 4;
-                    vm.save()
-                else:
-                    application.state = 5
-            elif request.POST['request_type'] == 'savestate':
-                vm = VirtualMachine.objects.get(uuid=vm_uuid)
-                if vm.state < 3:
-                    vm.state = 2
-                    application.state = 4;
-                    vm.save()
-                else:
-                    application.state = 5
-            elif request.POST['request_type'] == 'delete':
-                vm = VirtualMachine.objects.get(uuid=vm_uuid)
-                if vm.state < 3:
-                    vm.state = 3
-                    application.state = 4;
-                    vm.save()
-                else:
-                    application.state = 5
-        webServer_response['request_userid'] = request.POST['request_userid']
-        webServer_response['request_response'] = "received"
-    except Exception, e:
-        print e
-        application.state = 5
-        webServer_response['request_response'] = str(e)
-    finally:
+            response['request_response'] = 'type error'
+    else:
+        application.state = request.POST['request_result']
+        application.error_information = request.POST['error_information']
         application.save()
-        return HttpResponse(str(webServer_response))
+        response['request_response'] = 'received'
+        return HttpResponse(str(response))
+
+

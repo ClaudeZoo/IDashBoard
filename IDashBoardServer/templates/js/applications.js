@@ -12,6 +12,8 @@ $(document).ready(function(){
 			{'data': 'type'},
             {'data': 'state'}
         ],
+        "ordering": true,
+        "order": [[ 0, "desc" ]],
         initComplete: function(){
             //$('#vm-count').prepend($('#refresh-button-group'));
         },
@@ -23,17 +25,13 @@ $(document).ready(function(){
             memory = data.parameter.memory;
             os = data.parameter.os;
             vm_type = data.parameter.vm_type;
-            osset = ['ubuntu 14.04 LTS'];
-            memoryset = ['1024M', '2048M'];
-            vm_typeset = ['普通虚拟机', 'OpenStack 控制器', 'OpenStack 存储器'];
             if(data.type=='new'){
-                var parameterhtml = '<div><strong>vm_type:</strong>' + vm_typeset[vm_type - 1] + '<br><strong>os:</strong>' + osset[os - 1] + '<br><strong>memory:</strong>' +  memoryset[memory - 1] + '</div>';
+                var parameterhtml = '<div><strong>vm_type:</strong>' + vm_type + '<br><strong>os:</strong>' + os + '<br><strong>memory:</strong>' +  memory + 'M</div>';
             }
             else{
                 parameterhtml = '<div><strong>uuid:</strong>'+ data.parameter.uuid+'</div>'
             }
-            var states = ["1.已申请", "2.已通过", "3.已拒绝", "4.正在执行", "5.执行完毕", "6.执行异常"];
-            $('td:eq(3)', row).html(states[data.state]);
+            $('td:eq(3)', row).html(data.state);
             $('td:eq(1)', row).html(parameterhtml);
         },
         drawCallback: function () {

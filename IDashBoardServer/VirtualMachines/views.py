@@ -90,7 +90,7 @@ def helloServer(request):
 
 def get_my_VMs(request):
     if request.user.is_authenticated():
-        virtual_machines = VirtualMachine.objects.filter(vmUser=request.user, state__lt=3)
+        virtual_machines = VirtualMachine.objects.filter(vmUser=request.user).exclude(state='deleted')
         myVMs = []
         for virtual_machine in virtual_machines:
             try:
@@ -117,7 +117,7 @@ def get_my_VMs(request):
                 }
             finally:
                 myVMs.append(dic)
-        response={'data': myVMs}
+        response = {'data': myVMs}
         response['Access-Control-Allow-Origin'] = '*'
         return HttpResponse(json.dumps(response))
     else:
