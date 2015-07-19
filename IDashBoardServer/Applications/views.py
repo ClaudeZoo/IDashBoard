@@ -227,7 +227,7 @@ def ratify_application(request):
             application.state = 'in_queue'
             application.reviewer = request.user
             application.save()
-            notify = NotifyThread(application) 
+            notify = NotifyThread(application)
             notify.start()
         else:
             return HttpResponse("already treated")
@@ -242,6 +242,15 @@ def ratify_all(request):
         try:
             applications = Application.objects.filter(state='pending')
             for application in applications:
+                host = None
+                vms = application.applicant.vm_user.exclude(state='deleted')
+                if len(vms) == 0:
+                    hosts = VirtualMachine.objects.filter(uuid=None)
+                    host = random.sample(hosts, 1)[0]
+                else:
+                    host = vms[0].vmHost
+                application.host = host
+                #print(host)
                 application.state = 'in_queue'
                 application.reviewer = request.user
                 application.save()
