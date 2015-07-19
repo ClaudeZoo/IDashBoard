@@ -1,6 +1,4 @@
-/**
- * Created by wcx on 15/4/28.
- */
+
 $(document).ready(function(){
     $('#myVMs-data-table').DataTable({
         dom: 'R<"row"<"#vm-count.col-sm-6"<"#vm-count-label">><"col-sm-6"f>>rt<"row"<"col-sm-6"l><"col-sm-6"p>>',
@@ -24,16 +22,13 @@ $(document).ready(function(){
             username = data.parameter.username;
             memory = data.parameter.memory;
             os = data.parameter.os;
-            osset = ['ubuntu 14.04 LTS'];
-            memoryset = ['512M', '1024M'];
-            var states = ["online", "offline", "savestate"];
-            var parameterhtml = '<div><strong>OS:</strong>' + osset[os - 1] + '<br/><strong>Hostname:</strong>'
-                + hostname + '<br><strong>Username:</strong>' + username + '<br><strong>Memory:</strong>' +  memoryset[memory - 1] + '</div>';
+            var parameterhtml = '<div><strong>OS:</strong>' + os + '<br/><strong>Hostname:</strong>'
+                + hostname + '<br><strong>Username:</strong>' + username + '<br><strong>Memory:</strong>' +  memory + 'M' + '</div>';
             var start_button = '<button class="btn btn-success startVM">Start VM</button>';
             var savestate_button = '<button class="btn btn-success savestateVM">Savestate</button>';
             var shutdown_button = '<button class="btn btn-success shutdownVM">Shutdown</button>';
             var delete_button = '<button class="btn btn-danger deleteVM" data-toggle="modal" data-target="#deleteModal">Delete VM</button>';
-            if (data.state == 0)
+            if (data.state == 'online')
             {
                 start_button = '<button class="btn btn-success startVM disabled">Start VM</button>';
                 delete_button = '<button class="btn btn-danger deleteVM disabled" data-toggle="modal" data-target="#deleteModal">Delete VM</button>';
@@ -44,7 +39,7 @@ $(document).ready(function(){
                 shutdown_button = '<button class="btn btn-warning shutdownVM disabled">Shutdown</button>';
             }
             var treatmenthtml = '<div>'+ start_button + savestate_button + shutdown_button + delete_button + '</div>';
-            var statehtml = '<a href=/detail/' + data.id + '/ >'+states[data.state]+'</a>';
+            var statehtml = '<div class="vm_state"><a href=/detail/' + data.id + '/ >'+data.state+'</a></div>';
             $('td:eq(4)', row).html(treatmenthtml);
             $('td:eq(3)', row).html(parameterhtml);
             $('td:eq(2)', row).html(statehtml);
@@ -57,44 +52,67 @@ $(document).ready(function(){
                 $('#myVMs-data-table tr').on('click', 'button.startVM', function () {
                     var id = $(this).parentsUntil('tbody').last().attr('data-id');
                     $(this).addClass('disabled');
-                    $(this).siblings('button.savestateVM').removeClass('disabled');
-                    $(this).siblings('button.shutdownVM').removeClass('disabled');
-                    $(this).siblings('button.deleteVM').addClass('disabled');
-                    $(this).parent().parent().parent().children().eq(2).html("loading");
-                    json_obj = {'id': id}
-                        $.post('/start_apply/', JSON.stringify(json_obj), function(data){
+                    $(this).siblings('button').addClass('disabled');
+                    $(this).parents('tr').find('.vm_state').html('<img src="/img/loading.gif" alt=""/>');
+                        $.post('/control_vm/', {'id': id, 'request_type': 'start'}, function(response){
+                                var response_json = eval('(' + response + ')');
+                                if (response_json.request_result === 'success'){
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >online</a></div>');
+                                    $("[data-id="+id+"]").find('.shutdownVM').removeClass('disabled');
+                                    $("[data-id="+id+"]").find('.savestateVM').removeClass('disabled');
+                                }
+                                else {
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >offline</a></div>');
+                                    $("[data-id="+id+"]").find('.startVM').removeClass('disabled');
+                                    $("[data-id="+id+"]").find('.deleteVM').removeClass('disabled');
+                                    alert('error: ' + response_json.error_information)
+                                }
                         }
                     );
                 });
                 $('#myVMs-data-table tr').on('click', 'button.shutdownVM', function () {
                     var id = $(this).parentsUntil('tbody').last().attr('data-id');
                     $(this).addClass('disabled');
-                    $(this).siblings('button.deleteVM').removeClass('disabled');
-                    $(this).siblings('button.startVM').removeClass('disabled');
-                    $(this).siblings('button.savestateVM').addClass('disabled');
-                    $(this).parent().parent().parent().children().eq(2).html("loading");
-                    json_obj = {'id': id}
-                        $.post('/stop_apply/', JSON.stringify(json_obj), function(data){
+                    $(this).siblings('button').addClass('disabled');
+                    $(this).parents('tr').find('.vm_state').html('<img src="/img/loading.gif" alt=""/>');
+                        $.post('/control_vm/', {'id': id, 'request_type': 'shutdown'}, function(response){
+                                var response_json = eval('(' + response + ')');
+                                if (response_json.request_result === 'success'){
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >offline</a></div>');
+                                    $("[data-id="+id+"]").find('.startVM').removeClass('disabled');
+                                    $("[data-id="+id+"]").find('.deleteVM').removeClass('disabled');
+                                }
+                                else {
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >online</a></div>');
+                                    $("[data-id="+id+"]").find('.shutdownVM').removeClass('disabled');
+                                    $("[data-id="+id+"]").find('.savestateVM').removeClass('disabled');
+                                    alert('error: ' + response_json.error_information)
+                                }
                         }
                     );
                 });
                 $('#myVMs-data-table tr').on('click', 'button.savestateVM', function () {
                     var id = $(this).parentsUntil('tbody').last().attr('data-id');
                     $(this).addClass('disabled');
-                    $(this).siblings('button.deleteVM').removeClass('disabled');
-                    $(this).siblings('button.startVM').removeClass('disabled');
-                    $(this).siblings('button.shutdownVM').addClass('disabled');
-                    $(this).parent().parent().parent().children().eq(2).html("loading");
-                    json_obj = {'id': id}
-                        $.post('/savestate_apply/', JSON.stringify(json_obj), function(data){
+                    $(this).siblings('button').addClass('disabled');
+                    $(this).parents('tr').find('.vm_state').html('<img src="/img/loading.gif" alt=""/>');
+                        $.post('/control_vm/', {'id': id, 'request_type': 'savestate'}, function(response){
+                                var response_json = eval('(' + response + ')');
+                                if (response_json.request_result === 'success'){
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >savestate</a></div>');
+                                    $("[data-id="+id+"]").find('.startVM').removeClass('disabled');
+                                    $("[data-id="+id+"]").find('.deleteVM').removeClass('disabled');
+                                }
+                                else {
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >online</a></div>');
+                                    $("[data-id="+id+"]").find('.savestateVM').removeClass('disabled');
+                                    $("[data-id="+id+"]").find('.shutdownVM').removeClass('disabled');
+                                    alert('error: ' + response_json.error_information)
+                                }
                         }
                     );
                 });
                 $('#myVMs-data-table tr').on('click', 'button.deleteVM', function () {
-                    $(this).addClass('disabled');
-                    $(this).siblings('button.savestateVM').addClass('disabled');
-                    $(this).siblings('button.startVM').addClass('disabled');
-                    $(this).siblings('button.shutdownVM').addClass('disabled');
                     $("#deleteModal").attr("data-id", $(this).parentsUntil('tbody').last().attr('data-id'))
                 });
             }
