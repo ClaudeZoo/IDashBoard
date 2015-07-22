@@ -98,6 +98,9 @@ def get_my_VMs(request):
                 dic = {
                     "id": virtual_machine.id,
                     "uuid": virtual_machine.uuid,
+                    "vm_name": virtual_machine.vmName,
+                    "IP": virtual_machine.IPAddress,
+                    "WAN_IP": virtual_machine.WANIP,
                     "port": virtual_machine.port,
                     "state": virtual_machine.state,
                     "parameter":

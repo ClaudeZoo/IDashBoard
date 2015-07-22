@@ -313,6 +313,7 @@ def reply_vmHost(request):
                                     vmName=vm_name, hostname='ubuntu', username=vm_username, state='poweroff', port=vm_port)
             new_vm.vmHost = application.host
             new_vm.vmUser = application.applicant
+            new_vm.WANIP = application.host.WANIP
             new_vm.save()
             application.vm = new_vm
             application.state = 'done'

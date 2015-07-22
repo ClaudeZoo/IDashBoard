@@ -4,8 +4,9 @@ $(document).ready(function(){
         dom: 'R<"row"<"#vm-count.col-sm-6"<"#vm-count-label">><"col-sm-6"f>>rt<"row"<"col-sm-6"l><"col-sm-6"p>>',
         ajax: '/get_my_VMs/',
         columns:[
-            {'data': 'uuid'},
-            {'data': 'port'},
+            {'data': 'vm_name'},
+            {'data': 'WAN_IP'},
+            {'data': 'IP'},
             {'data': 'state'},
 			{'data': 'parameter'},
             {'data': 'treatment'}
@@ -18,6 +19,7 @@ $(document).ready(function(){
 			$(row).attr('data-id', data.id);
 		},
         rowCallback: function(row, data) {
+            var ssh_ip_port = data.WAN_IP + ' : ' + data.port;
             hostname = data.parameter.hostname;
             username = data.parameter.username;
             memory = data.parameter.memory;
@@ -40,9 +42,10 @@ $(document).ready(function(){
             }
             var treatmenthtml = '<div>'+ start_button + savestate_button + shutdown_button + delete_button + '</div>';
             var statehtml = '<div class="vm_state"><a href=/detail/' + data.id + '/ >'+data.state+'</a></div>';
-            $('td:eq(4)', row).html(treatmenthtml);
-            $('td:eq(3)', row).html(parameterhtml);
-            $('td:eq(2)', row).html(statehtml);
+            $('td:eq(5)', row).html(treatmenthtml);
+            $('td:eq(4)', row).html(parameterhtml);
+            $('td:eq(3)', row).html(statehtml);
+            $('td:eq(1)', row).html(ssh_ip_port);
         },
         drawCallback: function () {
             var myVMCount = this.api().data().length;

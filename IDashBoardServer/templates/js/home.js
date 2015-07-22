@@ -8,10 +8,9 @@ $(document).ready(function() {
 		columns: [
 			{'data': 'ip'},
 			{'data': 'os'},
-			{'data': 'HostName'},
-			{'data': 'UserName'},
+			{'data': 'CPU'},
 			{'data': 'Memory'},
-			{'data': 'CPU'}
+			{'data': 'Disk'}
 		],
 		responsive: {
 			details: {
@@ -43,7 +42,7 @@ $(document).ready(function() {
 			console.log('draw complete');
 			var hostCount = this.api().data().length;
 			// 显示在线虚拟机数量
-			$('#host-count-label').html('<label><strong> ' + hostCount + ' </strong> hosts available.</label>');
+			$('#host-count-label').html('<label><strong> ' + hostCount + ' </strong> physical servers available.</label>');
 
 			if (hostCount != 0) {
 				// 单击单元格跳转到详细信息
@@ -62,6 +61,9 @@ $(document).ready(function() {
 		createdRow: function(row, data) {
 			// 为每一行赋予一个虚拟机id
 			$(row).attr('data-id', data.id);
+            if (data.state === "offline"){
+                $(row).addClass('danger');
+            }
 		},
 		rowCallback: function(row, data) {
 			// 修改占用率为进度条样式
@@ -77,12 +79,14 @@ $(document).ready(function() {
 					return ' progress-bar-danger';
 				}
 			}
+            var ip_wan_ip = data.ip + ' / ' + data.wan_ip;
 			var memPercent = data.Memory;
 			var memHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(memPercent) + '" role="progressbar" style="min-width: 2em; width: ' + memPercent + ';">' + memPercent + '</div></div>';
             var cpuPencent = data.CPU;
             var cpuHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(cpuPencent) + '" role="progressbar" style="min-width: 2em; width: ' + cpuPencent + ';">' + cpuPencent + '</div></div>';
-			$('td:eq(4)', row).html(memHtml);
-            $('td:eq(5)', row).html(cpuHtml);
+			$('td:eq(0)', row).html(ip_wan_ip);
+            $('td:eq(3)', row).html(memHtml);
+            $('td:eq(2)', row).html(cpuHtml);
 
 			// 去掉Operating System中末尾的符号
 			// 这部分最好后台来做
@@ -96,12 +100,13 @@ $(document).ready(function() {
 		dom: 'R<"row"<"#vm-count.col-sm-6"<"#vm-count-label">><"col-sm-6"f>>rt<"row"<"col-sm-6"l><"col-sm-6"p>>',
 		ajax: '/refreshSimplePage/',
 		columns: [
+			{'data': 'vm_name'},
+            {'data': 'wan_ip'},
 			{'data': 'ip'},
 			{'data': 'os'},
-			{'data': 'HostName'},
-			{'data': 'UserName'},
+			{'data': 'CPU'},
 			{'data': 'Memory'},
-			{'data': 'CPU'}
+			{'data': 'Disk'}
 		],
 		responsive: {
 			details: {
@@ -151,6 +156,9 @@ $(document).ready(function() {
 		createdRow: function(row, data) {
 			// 为每一行赋予一个虚拟机id
 			$(row).attr('data-id', data.id);
+            if (data.state === "offline"){
+                $(row).addClass('danger');
+            }
 		},
 		rowCallback: function(row, data) {
 			// 修改占用率为进度条样式
@@ -166,13 +174,14 @@ $(document).ready(function() {
 					return ' progress-bar-danger';
 				}
 			}
+            var ip_wan_ip = data.wan_ip + ' : ' + data.port;
 			var memPercent = data.Memory;
 			var memHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(memPercent) + '" role="progressbar" style="min-width: 2em; width: ' + memPercent + ';">' + memPercent + '</div></div>';
             var cpuPencent = data.CPU;
             var cpuHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(cpuPencent) + '" role="progressbar" style="min-width: 2em; width: ' + cpuPencent + ';">' + cpuPencent + '</div></div>';
-			$('td:eq(4)', row).html(memHtml);
-            $('td:eq(5)', row).html(cpuHtml);
-
+			$('td:eq(1)', row).html(ip_wan_ip);
+            $('td:eq(5)', row).html(memHtml);
+            $('td:eq(4)', row).html(cpuHtml);
 			// 去掉Operating System中末尾的符号
 			// 这部分最好后台来做
 			//var osText = $('td:eq(1)', row).text();

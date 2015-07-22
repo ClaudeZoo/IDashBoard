@@ -7,6 +7,7 @@ class VirtualMachine(models.Model):
     vmName = models.TextField(null=True)
     vmUser = models.ForeignKey(User, related_name='vm_user', null=True)
     vmHost = models.ForeignKey('self', related_name='vm_host', null=True)
+    WANIP = models.TextField(null=True)
     IPAddress = models.TextField(null=True)
     port = models.PositiveIntegerField(null=True)
     type = models.PositiveIntegerField(null=True)

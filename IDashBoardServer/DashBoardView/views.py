@@ -149,28 +149,29 @@ def getAllActiveVMsSimpleHost():
     for vm in vms:
         try:
             dic = {
+                'state': 'online',
                 'ip': vm.IPAddress,
+                'wan_ip': vm.WANIP,
                 'os': vm.osInfo[0:-8],
-                'UserName': vm.username,
-                'HostName': vm.hostname,
+                'Disk': 'none',
                 'Memory': str(int(float(vm.mem.split()[1].rstrip('k')) / float(vm.mem.split()[0].rstrip('k')) * 100 + 0.5)) + '%',
                 'CPU': str(int(100 - float(vm.percentCPU.split()[3].split('%')[0]) + 0.5)) + '%',
                 'id': vm.id
             }
         except Exception, e:
-            print e
             dic = {
+                'state': 'online',
                 'ip': vm.IPAddress,
+                'wan_ip': vm.WANIP,
                 'os': vm.osInfo,
-                'UserName': vm.username,
-                'HostName': vm.hostname,
+                'Disk': 'none',
                 'Memory': '0%',
                 'CPU': '0%',
                 'id': vm.id
             }
         finally:
-            if vm.lastConnectTime < pytz.utc.localize(t):
-                dic['ip'] = "offline"
+            if vm.lastConnectTime < t:
+                dic['state'] = "offline"
             ActiveVMs.append(dic)
     return ActiveVMs
 
@@ -179,33 +180,41 @@ def getAllActiveVMsSimple():
     t = datetime.datetime.now()
     t -= datetime.timedelta(seconds=60)
     #vms = VirtualMachine.objects.filter(lastConnectTime__gte = t)
-    vms = VirtualMachine.objects.filter(~Q(uuid = None), ~Q(state = 3))
+    vms = VirtualMachine.objects.filter(~Q(uuid=None), ~Q(state='deleted'))
     ActiveVMs = []
     for vm in vms:
+        dict = {}
         try:
             dic = {
+                'state': 'online',
                 'ip': vm.IPAddress,
+                'wan_ip': vm.WANIP,
+                'port': vm.port,
                 'os': vm.osInfo[0:-8],
-                'UserName': vm.username,
-                'HostName': vm.hostname,
+                'vm_name': vm.vmName,
+                'Disk': 'none',
                 'Memory': str(int(float(vm.mem.split()[1].rstrip('k')) / float(vm.mem.split()[0].rstrip('k')) * 100 + 0.5)) + '%',
                 'CPU': str(int(100 - float(vm.percentCPU.split()[3].split('%')[0]) + 0.5)) + '%',
                 'id': vm.id
             }
         except Exception, e:
-            print e
+            print(e)
+            print('hehe')
             dic = {
+                'state': 'online',
                 'ip': vm.IPAddress,
+                'wan_ip': vm.WANIP,
+                'port': vm.port,
                 'os': vm.osInfo,
-                'UserName': vm.username,
-                'HostName': vm.hostname,
+                'vm_name': vm.vmName,
+                'Disk': 'none',
                 'Memory': '0%',
                 'CPU': '0%',
                 'id': vm.id
             }
         finally:
-            if vm.lastConnectTime < pytz.utc.localize(t):
-                dic['ip'] = "offline"
+            if vm.lastConnectTime < t:
+                dic['state'] = "offline"
             ActiveVMs.append(dic)
     return ActiveVMs
 

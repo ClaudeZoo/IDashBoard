@@ -44,7 +44,7 @@ class NotifyThread(threading.Thread):
             else:
                 print(response)
         except Exception, e:
-            self.application.state = 'error'
+            self.application.state = "Can't find VM Manager"
             print e
         finally:
             self.application.save()
