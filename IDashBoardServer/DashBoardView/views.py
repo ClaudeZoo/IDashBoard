@@ -117,6 +117,7 @@ def RefreshSimplePage(request):
     else:
         return render_to_response('index.html', locals())
 
+
 def RefreshSimplePageHost(request):
     if request.user.is_authenticated():
         ActiveVMs = getAllActiveVMsSimpleHost()
@@ -125,6 +126,7 @@ def RefreshSimplePageHost(request):
         return HttpResponse(json.dumps(response))
     else:
         return render_to_response('index.html', locals())
+
 
 def VMDetails(request, ip):
     vmDetail = {}
@@ -147,13 +149,17 @@ def getAllActiveVMsSimpleHost():
     vms = VirtualMachine.objects.filter(uuid=None)
     ActiveVMs = []
     for vm in vms:
+        if vm.IPAddress == '10.0.0.121':
+            disk_used = get_host2_disk_used(vm.disk)
+        else:
+            disk_used = get_host1_disk_used(vm.disk)
         try:
             dic = {
                 'state': 'online',
                 'ip': vm.IPAddress,
                 'wan_ip': vm.WANIP,
                 'os': vm.osInfo[0:-8],
-                'Disk': 'none',
+                'Disk': disk_used,
                 'Memory': str(int(float(vm.mem.split()[1].rstrip('k')) / float(vm.mem.split()[0].rstrip('k')) * 100 + 0.5)) + '%',
                 'CPU': str(int(100 - float(vm.percentCPU.split()[3].split('%')[0]) + 0.5)) + '%',
                 'id': vm.id
@@ -164,7 +170,7 @@ def getAllActiveVMsSimpleHost():
                 'ip': vm.IPAddress,
                 'wan_ip': vm.WANIP,
                 'os': vm.osInfo,
-                'Disk': 'none',
+                'Disk': '0%',
                 'Memory': '0%',
                 'CPU': '0%',
                 'id': vm.id
@@ -184,6 +190,7 @@ def getAllActiveVMsSimple():
     ActiveVMs = []
     for vm in vms:
         dict = {}
+        disk_used = get_disk_used(vm.disk)
         try:
             dic = {
                 'state': 'online',
@@ -192,7 +199,7 @@ def getAllActiveVMsSimple():
                 'port': vm.port,
                 'os': vm.osInfo[0:-8],
                 'vm_name': vm.vmName,
-                'Disk': 'none',
+                'Disk': disk_used,
                 'Memory': str(int(float(vm.mem.split()[1].rstrip('k')) / float(vm.mem.split()[0].rstrip('k')) * 100 + 0.5)) + '%',
                 'CPU': str(int(100 - float(vm.percentCPU.split()[3].split('%')[0]) + 0.5)) + '%',
                 'id': vm.id
@@ -207,7 +214,7 @@ def getAllActiveVMsSimple():
                 'port': vm.port,
                 'os': vm.osInfo,
                 'vm_name': vm.vmName,
-                'Disk': 'none',
+                'Disk': '0%',
                 'Memory': '0%',
                 'CPU': '0%',
                 'id': vm.id
@@ -217,6 +224,90 @@ def getAllActiveVMsSimple():
                 dic['state'] = "offline"
             ActiveVMs.append(dic)
     return ActiveVMs
+
+
+def get_disk_used(disk_info):
+    disk_list = disk_info.split()
+    used = 0
+    size = 0
+    if (len(disk_list) - 7) % 6 == 0:
+        disk_number = (len(disk_list) - 7) / 6
+        for index in range(1, disk_number):
+            size_info = disk_list[index*6 + 2]
+            if size_info[-1] == 'K':
+                size += float(size_info[:-1])
+            elif size_info[-1] == 'M':
+                size += float(size_info[:-1]) * 1024
+            elif size_info[-1] == 'G':
+                size += float(size_info[:-1]) * 1024 * 1024
+            else:
+                size += 0
+            used_info = disk_list[index*6 + 3]
+            if used_info[-1] == 'K':
+                used += float(used_info[:-1])
+            elif used_info[-1] == 'M':
+                used += float(used_info[:-1]) * 1024
+            elif used_info[-1] == 'G':
+                used += float(used_info[:-1]) * 1024 * 1024
+            else:
+                used += 0
+    return str(int(100 * used / size + 0.5)) + '%'
+
+
+def get_host1_disk_used(disk_info):
+    disk_list = disk_info.split()
+    used = 0
+    size = 0
+    if (len(disk_list) - 9) % 6 == 0:
+        disk_number = (len(disk_list) - 9) / 6
+        for index in range(1, disk_number+1):
+            size_info = disk_list[index*6 + 4]
+            if size_info[-1] == 'K':
+                size += float(size_info[:-1])
+            elif size_info[-1] == 'M':
+                size += float(size_info[:-1]) * 1024
+            elif size_info[-1] == 'G':
+                size += float(size_info[:-1]) * 1024 * 1024
+            else:
+                size += 0
+            used_info = disk_list[index*6 + 5]
+            if used_info[-1] == 'K':
+                used += float(used_info[:-1])
+            elif used_info[-1] == 'M':
+                used += float(used_info[:-1]) * 1024
+            elif used_info[-1] == 'G':
+                used += float(used_info[:-1]) * 1024 * 1024
+            else:
+                used += 0
+    return str(int(100 * used / size + 0.5)) + '%'
+
+
+def get_host2_disk_used(disk_info):
+    disk_list = disk_info.split()
+    used = 0
+    size = 0
+    if (len(disk_list) - 7) % 6 == 0:
+        disk_number = (len(disk_list) - 7) / 6
+        for index in range(1, disk_number+1):
+            size_info = disk_list[index*6 + 2]
+            if size_info[-1] == 'K':
+                size += float(size_info[:-1])
+            elif size_info[-1] == 'M':
+                size += float(size_info[:-1]) * 1024
+            elif size_info[-1] == 'G':
+                size += float(size_info[:-1]) * 1024 * 1024
+            else:
+                size += 0
+            used_info = disk_list[index*6 + 3]
+            if used_info[-1] == 'K':
+                used += float(used_info[:-1])
+            elif used_info[-1] == 'M':
+                used += float(used_info[:-1]) * 1024
+            elif used_info[-1] == 'G':
+                used += float(used_info[:-1]) * 1024 * 1024
+            else:
+                used += 0
+    return str(int(100 * used / size + 0.5)) + '%'
 
 
 def getAllActiveVMs():

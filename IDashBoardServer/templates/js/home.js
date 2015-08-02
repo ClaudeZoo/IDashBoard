@@ -10,7 +10,7 @@ $(document).ready(function() {
 			{'data': 'os'},
 			{'data': 'CPU'},
 			{'data': 'Memory'},
-			{'data': 'Disk'}
+			{'data': 'Disk'},
 		],
 		responsive: {
 			details: {
@@ -61,9 +61,6 @@ $(document).ready(function() {
 		createdRow: function(row, data) {
 			// 为每一行赋予一个虚拟机id
 			$(row).attr('data-id', data.id);
-            if (data.state === "offline"){
-                $(row).addClass('danger');
-            }
 		},
 		rowCallback: function(row, data) {
 			// 修改占用率为进度条样式
@@ -84,14 +81,15 @@ $(document).ready(function() {
 			var memHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(memPercent) + '" role="progressbar" style="min-width: 2em; width: ' + memPercent + ';">' + memPercent + '</div></div>';
             var cpuPencent = data.CPU;
             var cpuHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(cpuPencent) + '" role="progressbar" style="min-width: 2em; width: ' + cpuPencent + ';">' + cpuPencent + '</div></div>';
+            var diskPercent = data.Disk;
+			var diskHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(diskPercent) + '" role="progressbar" style="min-width: 2em; width: ' + diskPercent + ';">' + diskPercent + '</div></div>';
 			$('td:eq(0)', row).html(ip_wan_ip);
+            $('td:eq(4)', row).html(diskHtml);
             $('td:eq(3)', row).html(memHtml);
             $('td:eq(2)', row).html(cpuHtml);
-
-			// 去掉Operating System中末尾的符号
-			// 这部分最好后台来做
-			//var osText = $('td:eq(1)', row).text();
-			//$('td:eq(1)', row).text(osText.substring(0, osText.length - 8));
+            if(data.state==='offline'){
+                $(row).addClass('danger');
+            }
 		}
 	});
 
@@ -156,9 +154,6 @@ $(document).ready(function() {
 		createdRow: function(row, data) {
 			// 为每一行赋予一个虚拟机id
 			$(row).attr('data-id', data.id);
-            if (data.state === "offline"){
-                $(row).addClass('danger');
-            }
 		},
 		rowCallback: function(row, data) {
 			// 修改占用率为进度条样式
@@ -179,13 +174,15 @@ $(document).ready(function() {
 			var memHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(memPercent) + '" role="progressbar" style="min-width: 2em; width: ' + memPercent + ';">' + memPercent + '</div></div>';
             var cpuPencent = data.CPU;
             var cpuHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(cpuPencent) + '" role="progressbar" style="min-width: 2em; width: ' + cpuPencent + ';">' + cpuPencent + '</div></div>';
+			var diskPercent = data.Disk;
+			var diskHtml = '<div class="progress" style="margin-bottom: 0px;"><div class="progress-bar' + getProgressBarClass(diskPercent) + '" role="progressbar" style="min-width: 2em; width: ' + diskPercent + ';">' + diskPercent + '</div></div>';
 			$('td:eq(1)', row).html(ip_wan_ip);
+            $('td:eq(6)', row).html(diskHtml);
             $('td:eq(5)', row).html(memHtml);
             $('td:eq(4)', row).html(cpuHtml);
-			// 去掉Operating System中末尾的符号
-			// 这部分最好后台来做
-			//var osText = $('td:eq(1)', row).text();
-			//$('td:eq(1)', row).text(osText.substring(0, osText.length - 8));
+            if(data.state==='offline'){
+                $(row).addClass('danger');
+            }
 		}
 	});
 

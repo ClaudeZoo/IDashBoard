@@ -62,13 +62,11 @@ WSGI_APPLICATION = 'IDashBoardServer.wsgi.application'
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'IDashBoarddb',
-        'USER':'root',
-        'PASSWORD':'wuzher1||',
-        'HOST':'127.0.0.1',
+        'USER': 'root',
+        'PASSWORD': '...',
+        'HOST': '127.0.0.1',
     }
 }
 

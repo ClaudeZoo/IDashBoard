@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # Create your models here.
 class VirtualMachine(models.Model):
     uuid = models.TextField(null=True)
@@ -36,6 +37,7 @@ class VirtualMachine(models.Model):
     username = models.TextField(null=True)
     cpuInfo = models.TextField(null=True)
     osInfo = models.TextField(null=True)
+    disk = models.TextField(null=True)
 
 
     def updateInfo(self, info):
@@ -72,3 +74,5 @@ class VirtualMachine(models.Model):
             self.process = info["process"]
         if "port" in info:
             self.port = info["port"]
+        if "disk" in info:
+            self.disk = info["disk"]
