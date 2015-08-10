@@ -190,8 +190,8 @@ def getAllActiveVMsSimple():
     ActiveVMs = []
     for vm in vms:
         dict = {}
-        disk_used = get_disk_used(vm.disk)
         try:
+            disk_used = get_disk_used(vm.disk)
             dic = {
                 'state': 'online',
                 'ip': vm.IPAddress,
