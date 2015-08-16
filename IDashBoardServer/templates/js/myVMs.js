@@ -28,7 +28,7 @@ $(document).ready(function(){
                 + hostname + '<br><strong>Username:</strong>' + username + '<br><strong>Memory:</strong>' +  memory + 'M' + '</div>';
             var start_button = '<button class="btn btn-success startVM">Start VM</button>';
             var savestate_button = '<button class="btn btn-success savestateVM">Savestate</button>';
-            var shutdown_button = '<button class="btn btn-success shutdownVM">Shutdown</button>';
+            var shutdown_button = '<button class="btn btn-warning shutdownVM">Shutdown</button>';
             var delete_button = '<button class="btn btn-danger deleteVM" data-toggle="modal" data-target="#deleteModal">Delete VM</button>';
             if (data.state == 'online')
             {
