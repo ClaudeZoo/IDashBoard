@@ -41,9 +41,9 @@ $(document).ready(function(){
                 shutdown_button = '<button class="btn btn-warning shutdownVM disabled">Shutdown</button>';
             }
             var treatmenthtml = '<div>'+ start_button + savestate_button + shutdown_button + delete_button + '</div>';
-            var online_display = '<i class="fa fa-check-circle"></i>'
-            var poweroff_display = '<i class="fa fa-times-circle"></i>'
-            var savestate_display = '<i class="fa fa-hdd-o"></i>'
+            var online_display = '<i class="fa fa-check-circle"></i> '
+            var poweroff_display = '<i class="fa fa-times-circle"></i> '
+            var savestate_display = '<i class="fa fa-hdd-o"></i> '
             var state_display = ''
             if (data.state === 'online')
                 state_display = online_display + data.state
@@ -59,9 +59,9 @@ $(document).ready(function(){
         },
         drawCallback: function () {
             var myVMCount = this.api().data().length;
-            var online_display = '<i class="fa fa-check-circle"></i>online'
-            var poweroff_display = '<i class="fa fa-times-circle"></i>poweroff'
-            var savestate_display = '<i class="fa fa-hdd-o"></i>savestate'
+            var online_display = '<i class="fa fa-check-circle"></i> online'
+            var poweroff_display = '<i class="fa fa-times-circle"></i> poweroff'
+            var savestate_display = '<i class="fa fa-hdd-o"></i> savestate'
             $('#vm-count-label').html('<label>I have <strong> ' + myVMCount + ' </strong> Virtual Machines.</label>');
             if (myVMCount != 0) {
                 // 单击单元格跳转到详细信息
