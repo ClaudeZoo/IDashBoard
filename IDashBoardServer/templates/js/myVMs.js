@@ -41,14 +41,27 @@ $(document).ready(function(){
                 shutdown_button = '<button class="btn btn-warning shutdownVM disabled">Shutdown</button>';
             }
             var treatmenthtml = '<div>'+ start_button + savestate_button + shutdown_button + delete_button + '</div>';
-            var statehtml = '<div class="vm_state"><a href=/detail/' + data.id + '/ >'+data.state+'</a></div>';
+            var online_display = '<i class="fa fa-2x fa-check-circle"></i>'
+            var poweroff_display = '<i class="fa fa-2x fa-times-circle"></i>'
+            var savestate_display = '<i class="fa fa-2x fa-hdd-o"></i>'
+            var state_display = ''
+            if (data.state === 'online')
+                state_display = online_display + data.state
+            else if (data.state === 'poweroff')
+                state_display = poweroff_display + data.state
+            else
+                state_display = savestate_display + data.state
+            $('td:eq(1)', row).html(ssh_ip_port);
+            var statehtml = '<div class="vm_state"><a href=/detail/' + data.id + '/ >' + state_display + '</a></div>';
             $('td:eq(5)', row).html(treatmenthtml);
             $('td:eq(4)', row).html(parameterhtml);
             $('td:eq(3)', row).html(statehtml);
-            $('td:eq(1)', row).html(ssh_ip_port);
         },
         drawCallback: function () {
             var myVMCount = this.api().data().length;
+            var online_display = '<i class="fa fa-2x fa-check-circle"></i>online'
+            var poweroff_display = '<i class="fa fa-2x fa-times-circle"></i>poweroff'
+            var savestate_display = '<i class="fa fa-2x fa-hdd-o"></i>savestate'
             $('#vm-count-label').html('<label>I have <strong> ' + myVMCount + ' </strong> Virtual Machines.</label>');
             if (myVMCount != 0) {
                 // 单击单元格跳转到详细信息
@@ -60,12 +73,12 @@ $(document).ready(function(){
                         $.post('/control_vm/', {'id': id, 'request_type': 'start'}, function(response){
                                 var response_json = eval('(' + response + ')');
                                 if (response_json.request_result === 'success'){
-                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >online</a></div>');
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >' + online_display +'</a></div>');
                                     $("[data-id="+id+"]").find('.shutdownVM').removeClass('disabled');
                                     $("[data-id="+id+"]").find('.savestateVM').removeClass('disabled');
                                 }
                                 else {
-                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >offline</a></div>');
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >' + poweroff_display + '</a></div>');
                                     $("[data-id="+id+"]").find('.startVM').removeClass('disabled');
                                     $("[data-id="+id+"]").find('.deleteVM').removeClass('disabled');
                                     alert('error: ' + response_json.error_information)
@@ -81,12 +94,12 @@ $(document).ready(function(){
                         $.post('/control_vm/', {'id': id, 'request_type': 'shutdown'}, function(response){
                                 var response_json = eval('(' + response + ')');
                                 if (response_json.request_result === 'success'){
-                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >offline</a></div>');
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >' + poweroff_display + '</a></div>');
                                     $("[data-id="+id+"]").find('.startVM').removeClass('disabled');
                                     $("[data-id="+id+"]").find('.deleteVM').removeClass('disabled');
                                 }
                                 else {
-                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >online</a></div>');
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >' + online_display +'</a></div>');
                                     $("[data-id="+id+"]").find('.shutdownVM').removeClass('disabled');
                                     $("[data-id="+id+"]").find('.savestateVM').removeClass('disabled');
                                     alert('error: ' + response_json.error_information)
@@ -102,12 +115,12 @@ $(document).ready(function(){
                         $.post('/control_vm/', {'id': id, 'request_type': 'savestate'}, function(response){
                                 var response_json = eval('(' + response + ')');
                                 if (response_json.request_result === 'success'){
-                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >savestate</a></div>');
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >' + savestate_display +'</a></div>');
                                     $("[data-id="+id+"]").find('.startVM').removeClass('disabled');
                                     $("[data-id="+id+"]").find('.deleteVM').removeClass('disabled');
                                 }
                                 else {
-                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >online</a></div>');
+                                    $("[data-id="+id+"]").find('.vm_state').html('<a href=/detail/' + id + '/ >' + online_display +'</a></div>');
                                     $("[data-id="+id+"]").find('.savestateVM').removeClass('disabled');
                                     $("[data-id="+id+"]").find('.shutdownVM').removeClass('disabled');
                                     alert('error: ' + response_json.error_information)
