@@ -64,7 +64,7 @@ def get_detail(request, vm_id):
                 vmDetail['uName'] = vm[0].osInfo[0:-8]
                 vmDetail['cpuInfo'] = vm[0].cpuInfo
                 vmDetail['memory'] = vm[0].mem
-                vmDetail['swap'] = vm[0].swap
+                vmDetail['memory_swap'] = vm[0].swap
                 vmDetail['cpuLoad'] = vm[0].percentCPU
                 vmDetail['tasks'] = vm[0].tasks
                 vmDetail['userName'] = vm[0].username

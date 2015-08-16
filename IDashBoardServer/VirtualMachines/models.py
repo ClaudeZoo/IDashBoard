@@ -74,5 +74,5 @@ class VirtualMachine(models.Model):
             self.process = info["process"]
         if "port" in info:
             self.port = info["port"]
-        if "disk" in info:
-            self.disk = info["disk"]
+        if "Disk" in info:
+            self.disk = info["Disk"]

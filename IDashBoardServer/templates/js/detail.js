@@ -56,7 +56,7 @@ function refreshData() {
 		$('#td-os').text(data.uName);
 		$('#td-cpu-info').text(data.cpuInfo);
 		$('#td-total-mem').text(data.memory.split(" ")[0]);
-		$('#td-total-swap').text(data.swap.split(" ")[0]);
+		$('#td-total-swap').text(data.memory_swap.split(" ")[0]);
         var cpu = ["系统：","用户：","空闲：","等待IO：","硬中断：","软中断：","实际："];
         var strs = data.cpuLoad.split(" ");
         var str = ""
@@ -73,7 +73,7 @@ function refreshData() {
 		$('#td-mem-load').html(str);
         var swap = ["总交换区：","使用：","空闲：","缓冲："];
         str = ""
-        strs = data.memory.split(" ");
+        strs = data.memory_swap.split(" ");
         for (var i = 0; i < strs.length; i++){
             str += "<strong>"+swap[i]+"</strong>" + strs[i] + "&emsp;";
         }
